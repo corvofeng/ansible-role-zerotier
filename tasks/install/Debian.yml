@@ -1,7 +1,8 @@
-- name: Add ZeroTier PGP key
-  apt_key:
-    url: "{{ zerotier_gpg_url }}"
-    id: "{{ zerotier_gpg_fingerprint }}"
+- name: Add ZeroTier GPG key
+  ansible.builtin.shell:
+    cmd: "curl -fsSL {{ zerotier_gpg_url }} | gpg --dearmor -o /usr/share/keyrings/zerotier-keyring.gpg"
+  args:
+    creates: /usr/share/keyrings/zerotier-keyring.gpg
 
 - name: Check if Ubuntu release has dedicated repo
   uri:
@@ -26,6 +27,6 @@
 
 - name: Add ZeroTier APT repository
   apt_repository:
-    repo: deb {{ zerotier_download_base_url }}/debian/{{ zerotier_deb_release_repo }} {{ zerotier_deb_release_repo }} main
+    repo: deb [signed-by=/usr/share/keyrings/zerotier-keyring.gpg] {{ zerotier_download_base_url }}/debian/{{ zerotier_deb_release_repo }} {{ zerotier_deb_release_repo }} main
     filename: zerotier
   register: zerotier_repo
